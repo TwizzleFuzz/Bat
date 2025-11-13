@@ -1,0 +1,58 @@
+ÿþ&cls
+@echo off
+setlocal enabledelayedexpansion
+
+chcp 65001 >nul
+
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    powershell.exe -NoProfile -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+
+set "steam_path="
+for %%k in (
+    "HKEY_LOCAL_MACHINE\SOFTWARE\Valve\Steam"
+    "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Valve\Steam"
+) do (
+    for /f "tokens=2*" %%a in ('reg query %%k /v InstallPath 2^>nul') do (
+        set "steam_path=%%b"
+    )
+    if defined steam_path goto :found
+)
+
+echo Error: Steam install path not found in registry.
+pause
+exit /b 1
+
+:found
+
+set "config_dir=%steam_path%\config\stplug-in"
+if not exist "%config_dir%" mkdir "%config_dir%"
+
+set "depot_dir=%steam_path%\depotcache"
+
+set /p game_id=Enter game ID: 
+
+set "json_url=https://raw.githubusercontent.com/TwizzleFuzz/Bat/main/game-steam/games-list.json"
+powershell -Command "try { $json = Invoke-WebRequest -Uri '!json_url!' | ConvertFrom-Json; if ($json -contains '!game_id!') { Write-Output 'found' } else { Write-Output 'not_found' } } catch { Write-Output 'error: $_' }" > temp.txt
+set /p check=<temp.txt
+del temp.txt
+
+if "!check!"=="not_found" (
+    echo Game ID not found in list.
+    pause
+    exit /b 1
+) else if "!check:~0,6!"=="error:" (
+    echo Error checking game list: !check:~7!
+    pause
+    exit /b 1
+)
+
+echo Game ID found. Downloading files...
+
+powershell -Command "try { $api_url = 'https://api.github.com/repos/TwizzleFuzz/Bat/contents/game-steam/Manifest-lua/!game_id!'; $headers = @{'Accept'='application/vnd.github.v3+json'}; $response = Invoke-WebRequest -Uri $api_url -Headers $headers; $files = $response.Content | ConvertFrom-Json; foreach ($file in $files) { if ($file.type -eq 'file') { $raw_url = $file.download_url; $filename = $file.name; if ($filename -like '*.lua') { $out_path = \"!config_dir!\\$filename\" } elseif ($filename -like '*.manifest') { $out_path = \"!depot_dir!\\$filename\" } else { continue }; try { Invoke-WebRequest -Uri $raw_url -OutFile $out_path; Write-Output \"Downloaded: $filename to $out_path\" } catch { Write-Output \"Error downloading ${filename}: $_\" } } } } catch { Write-Output \"Error fetching files from GitHub: $_\" }"
+
+echo Setup complete.
+pause
+exit /b 0
