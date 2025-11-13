@@ -1,6 +1,3 @@
--- manifest & lua provided by: https://www.piracybound.com/discord
--- via manilua
--- Donated graciously by dogancanyr (315509080305303553)
 addappid(620)
 addappid(621, 1, "d2718f2424c94832a7112661774d98ffb3d52f454312f543a71418d253100d1d")
 addappid(622, 1, "0be76bef0b464b2d58b6ced70c86e608708c18c1204836cb1bb5d209776f8a0e")
@@ -11,6 +8,7 @@ addappid(626, 1, "50611154e0550112cb9f9edcc44cf32bb90a7fe8d2f5738f6f24b7ced43cf7
 addappid(627, 1, "4ff7fb0bde51bae4f2c7a9bb220fd2da9bd9b3b8210d222c615acf28a8fdd821")
 addappid(628, 1, "7f299ff4eec6b9de24869bb482a325b72f792798c87268f03feda25d4f3361c5")
 addappid(661, 1, "5e338dd8d07e4cda5dfbcc7eb03418d9b1d93192bc20d5aac2174b851b11c1a6")
+
 addappid(650)
 addappid(651)
 addappid(652)
